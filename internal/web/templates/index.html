@@ -1,0 +1,65 @@
+{{ define "index.html" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="/" class="text-xl font-bold text-gray-800">Go Echo HTMX</a>
+                    </div>
+                    <div class="ml-6 flex space-x-8">
+                        <a href="/" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-indigo-500">
+                            Home
+                        </a>
+                        <a href="/users" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900">
+                            Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">Welcome to Go Echo HTMX</h1>
+                <p class="text-gray-600 mb-4">
+                    A modern web application built with:
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li><strong>Go</strong> - Fast, simple, reliable programming language</li>
+                    <li><strong>Echo v4</strong> - High performance, extensible web framework</li>
+                    <li><strong>HTMX</strong> - Modern interactivity without JavaScript frameworks</li>
+                    <li><strong>Tailwind CSS</strong> - Utility-first CSS framework</li>
+                    <li><strong>PostgreSQL</strong> - Advanced open source database</li>
+                    <li><strong>sqlc</strong> - Type-safe SQL query generator</li>
+                </ul>
+                <div class="mt-6">
+                    <a href="/users" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                        View Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white mt-8">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 text-sm">
+                Built with Echo, HTMX, and Tailwind CSS
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
+{{ end }}

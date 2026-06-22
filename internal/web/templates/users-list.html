@@ -1,0 +1,5 @@
+{{ define "users-list.html" }}
+{{ range .Users }}
+{{ template "user-row.html" . }}
+{{ end }}
+{{ end }}
