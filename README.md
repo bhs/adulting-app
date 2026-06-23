@@ -91,10 +91,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the r
 
 ## Database
 
-This project uses Prisma with SQLite for local development. The schema includes two example models:
+This project uses Prisma with PostgreSQL for production deployments. The schema includes two example models:
 
 - **User** - Basic user information with email and name
 - **Post** - Blog posts linked to users
+
+**For local development**: You can use PostgreSQL locally, or temporarily switch to SQLite by changing `provider = "postgresql"` to `provider = "sqlite"` in `prisma/schema.prisma` and using `DATABASE_URL="file:./dev.db"`.
 
 ### Prisma Commands
 
@@ -128,23 +130,42 @@ curl -X POST http://localhost:3000/api/users \
 
 ## Deployment
 
-### Vercel (Recommended)
+### Render.com (Recommended for Full-Stack)
 
-This project is optimized for Vercel deployment:
+This project includes complete Render.com deployment configuration with managed PostgreSQL:
+
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Go to [Render Dashboard](https://dashboard.render.com)
+3. Click "New +" → "Blueprint"
+4. Connect your repository
+5. Render will detect `render.yaml` and provision:
+   - Web Service (Next.js app in Docker)
+   - PostgreSQL Database (free tier, 1GB)
+   - Automatic TLS/HTTPS
+6. Click "Apply" to deploy
+
+**Free tier includes**: 750 hours/month web service + PostgreSQL with 1GB storage.
+
+**Public URL**: `https://adulting-app.onrender.com` (or your custom domain)
+
+See [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md) for detailed deployment guide, troubleshooting, and configuration options.
+
+### Vercel (Alternative)
+
+This project can also be deployed on Vercel:
 
 1. Push your code to GitHub
 2. Import the project on [Vercel](https://vercel.com)
 3. Vercel will auto-detect Next.js and configure the build settings
 4. Add environment variables in Vercel dashboard (see `.env.example`)
-5. Deploy
+5. Use a hosted PostgreSQL database:
+   - [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
+   - [Neon](https://neon.tech/)
+   - [Supabase](https://supabase.com/)
+6. Update `DATABASE_URL` in Vercel environment variables
+7. Deploy
 
-For production, consider using a hosted database instead of SQLite:
-- [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
-- [PlanetScale](https://planetscale.com/)
-- [Neon](https://neon.tech/)
-- [Supabase](https://supabase.com/)
-
-Update your `DATABASE_URL` in the Vercel environment variables accordingly.
+**Note**: The Prisma schema now uses PostgreSQL by default. For local development with SQLite, temporarily change the provider in `prisma/schema.prisma`.
 
 ## Code Quality
 
