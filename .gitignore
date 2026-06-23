@@ -39,3 +39,17 @@ next-env.d.ts
 # prisma
 prisma/*.db
 prisma/*.db-journal
+
+# terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+!terraform/terraform.tfvars.example
+terraform/tfplan
+terraform/.terraform.tfstate.lock.info
+
+# aws
+*.zip
+.elasticbeanstalk/

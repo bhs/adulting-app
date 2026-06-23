@@ -1,0 +1,23 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Configuration
+aws_region   = "us-east-1" # Free tier eligible
+project_name = "nextjs-app"
+environment  = "production"
+
+# Domain Configuration (optional)
+# Leave empty to skip Route 53 and ACM setup
+# domain_name = "example.com"
+domain_name = ""
+
+# Database Configuration
+db_name     = "nextjsdb"
+db_username = "dbadmin"
+# db_password will be auto-generated if not provided
+# Set via environment variable: export TF_VAR_db_password="your-secure-password"
+# db_password = ""
+
+# Application Configuration
+node_env = "production"
+app_port = 3000

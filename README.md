@@ -128,9 +128,40 @@ curl -X POST http://localhost:3000/api/users \
 
 ## Deployment
 
-### Vercel (Recommended)
+### AWS with Terraform (Recommended for Production)
 
-This project is optimized for Vercel deployment:
+Deploy to AWS using Terraform with full infrastructure as code. Includes Elastic Beanstalk, RDS PostgreSQL, S3, and more - all within AWS Free Tier limits.
+
+**Quick Start** (15 minutes):
+```bash
+# Configure and deploy infrastructure
+./scripts/setup-aws.sh
+
+# Deploy application
+./scripts/deploy.sh
+```
+
+**Documentation**:
+- [AWS Quick Start Guide](./AWS_QUICK_START.md) - Get started in 15 minutes
+- [AWS Deployment Guide](./AWS_DEPLOYMENT.md) - Comprehensive documentation
+- [Migration Guide](./MIGRATION_GUIDE.md) - SQLite to PostgreSQL migration
+- [Terraform README](./terraform/README.md) - Infrastructure details
+
+**What you get**:
+- Elastic Beanstalk Node.js environment
+- RDS PostgreSQL database (db.t3.micro)
+- VPC with public/private subnets
+- Application Load Balancer
+- S3 buckets for assets
+- CloudWatch monitoring
+- SSM Parameter Store for secrets
+- Optional: Route 53 DNS + ACM SSL certificate
+
+**Cost**: Free for 12 months (AWS Free Tier), then ~$15-25/month
+
+### Vercel (Alternative)
+
+This project also supports Vercel deployment:
 
 1. Push your code to GitHub
 2. Import the project on [Vercel](https://vercel.com)
@@ -138,7 +169,7 @@ This project is optimized for Vercel deployment:
 4. Add environment variables in Vercel dashboard (see `.env.example`)
 5. Deploy
 
-For production, consider using a hosted database instead of SQLite:
+For production, use a hosted database:
 - [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
 - [PlanetScale](https://planetscale.com/)
 - [Neon](https://neon.tech/)
