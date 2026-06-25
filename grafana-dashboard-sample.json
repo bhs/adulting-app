@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "title": "Adulting App - OpenTelemetry Observability",
+    "tags": ["opentelemetry", "adulting-app"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "Request Rate (per minute)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"adulting-app\"}[1m])) * 60"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Error Rate (%)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"adulting-app\",http_status_code=~\"5..\"}[1m])) / sum(rate(http_server_request_duration_seconds_count{service_name=\"adulting-app\"}[1m])) * 100"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Request Duration (p50, p95, p99)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"adulting-app\"}[5m])) by (le))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"adulting-app\"}[5m])) by (le))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"adulting-app\"}[5m])) by (le))",
+            "legendFormat": "p99"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Database Query Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(db_client_operation_duration_seconds_bucket{service_name=\"adulting-app\"}[5m])) by (le, db_operation))"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Top 5 Slowest Endpoints",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(5, avg(http_server_request_duration_seconds_sum{service_name=\"adulting-app\"} / http_server_request_duration_seconds_count{service_name=\"adulting-app\"}) by (http_route))"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Error Count by Endpoint",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "sum(increase(http_server_request_duration_seconds_count{service_name=\"adulting-app\",http_status_code=~\"5..\"}[1h])) by (http_route)"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

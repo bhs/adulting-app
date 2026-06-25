@@ -15,6 +15,16 @@ services:
         fromDatabase:
           name: adulting-app-db
           property: connectionString
+      # OpenTelemetry Configuration
+      # Add these secrets in Render dashboard under Environment variables
+      - key: OTEL_EXPORTER_OTLP_ENDPOINT
+        sync: false
+      - key: OTEL_EXPORTER_OTLP_HEADERS
+        sync: false
+      - key: OTEL_SERVICE_NAME
+        value: adulting-app
+      - key: OTEL_SERVICE_VERSION
+        value: "1.0.0"
     buildCommand: npm run build
     startCommand: npm start
     autoDeploy: true

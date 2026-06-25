@@ -7,7 +7,8 @@ A minimal full-stack scaffold using Next.js 14 (App Router) with TypeScript, Tai
 - **Next.js 14** with App Router
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
-- **Prisma** ORM with SQLite database
+- **Prisma** ORM with PostgreSQL database
+- **OpenTelemetry** for distributed tracing and monitoring
 - **ESLint & Prettier** for code quality
 - **GitHub Actions** CI/CD pipeline
 - **Vercel** ready for zero-config deployment
@@ -26,13 +27,19 @@ A minimal full-stack scaffold using Next.js 14 (App Router) with TypeScript, Tai
 │   ├── Button.tsx
 │   └── Card.tsx
 ├── lib/                   # Utility functions and shared code
-│   └── prisma.ts          # Prisma client singleton
+│   ├── otel.ts            # OpenTelemetry utilities
+│   ├── otel-browser.tsx   # Browser-side telemetry
+│   ├── prisma.ts          # Prisma client singleton
+│   └── utils.ts           # Utility functions
 ├── prisma/                # Database schema and migrations
 │   └── schema.prisma      # Prisma schema definition
 ├── .github/
 │   └── workflows/
 │       └── ci.yml         # CI pipeline (lint, test, build)
+├── instrumentation.ts     # OpenTelemetry initialization
 ├── .env.example           # Environment variables template
+├── OPENTELEMETRY_SETUP.md # Complete OTel setup guide
+├── QUICKSTART_OTEL.md     # Quick start for OTel
 └── README.md
 ```
 
@@ -127,6 +134,31 @@ curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "name": "John Doe"}'
 ```
+
+## Error Tracking & Analytics
+
+This application includes comprehensive OpenTelemetry instrumentation for distributed tracing, metrics, and error tracking.
+
+### Features
+
+- **Automatic Instrumentation**: HTTP requests, database queries, and external API calls
+- **Custom Tracing**: Manual spans for business logic
+- **Error Tracking**: Full error context with stack traces
+- **Performance Monitoring**: Request latency, database performance, Core Web Vitals
+- **Managed Backend**: Export to Grafana Cloud, Honeycomb, or Axiom (free tiers available)
+
+### Quick Start
+
+See [QUICKSTART_OTEL.md](./QUICKSTART_OTEL.md) for a 5-minute setup guide using Grafana Cloud.
+
+### Detailed Setup
+
+See [OPENTELEMETRY_SETUP.md](./OPENTELEMETRY_SETUP.md) for complete documentation including:
+- Supported backends (Grafana Cloud, Honeycomb, Axiom)
+- Configuration options
+- Usage examples
+- Dashboard setup
+- Alert configuration
 
 ## Deployment
 
