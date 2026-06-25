@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,9 +16,24 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN
+  const plausibleHost = process.env.NEXT_PUBLIC_PLAUSIBLE_HOST || 'https://plausible.io'
+
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        {plausibleDomain && (
+          <Script
+            defer
+            data-domain={plausibleDomain}
+            src={`${plausibleHost}/js/script.js`}
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
+      <body className={inter.className}>
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </body>
     </html>
   )
 }
