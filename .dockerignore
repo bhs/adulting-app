@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Next.js
+.next
+out
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log*
+
+# Local env files
+.env
+.env*.local
+.env.development
+.env.test
+
+# Development files
+README.md
+DEVELOPMENT.md
+.vscode
+.github
+
+# Git
+.git
+.gitignore
+
+# Tests
+coverage
+.nyc_output
+
+# Database
+prisma/*.db
+prisma/*.db-journal
+dev.db
+*.db
+*.db-journal
