@@ -1,0 +1,340 @@
+# Grafana Alert Rules Configuration
+# Defines alert rules for error rate and session duration monitoring
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: adulting-app-alerts
+    folder: Adulting App
+    interval: 1m
+    rules:
+      # High Error Rate Alert
+      - uid: high-error-rate
+        title: High Error Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(http_server_request_duration_seconds_count{service_name="adulting-app",http_status_code=~"5.."}[5m])) / sum(rate(http_server_request_duration_seconds_count{service_name="adulting-app"}[5m])) * 100'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 5
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'Error rate is {{ printf "%.2f" $values.B.Value }}% (threshold: 5%)'
+          summary: The application error rate has exceeded 5% for the last 5 minutes
+        labels:
+          severity: critical
+          team: platform
+
+      # Sustained Error Rate Warning
+      - uid: sustained-error-rate
+        title: Sustained Error Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(http_server_request_duration_seconds_count{service_name="adulting-app",http_status_code=~"5.."}[5m])) / sum(rate(http_server_request_duration_seconds_count{service_name="adulting-app"}[5m])) * 100'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          description: 'Error rate is {{ printf "%.2f" $values.B.Value }}% (threshold: 1%)'
+          summary: The application error rate has exceeded 1% for the last 10 minutes
+        labels:
+          severity: warning
+          team: platform
+
+      # High Session Duration Alert (users staying too long might indicate confusion)
+      - uid: high-session-duration
+        title: High Session Duration (P95)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'histogram_quantile(0.95, sum(rate(browser_session_duration_milliseconds_bucket{service_name="adulting-app-browser"}[5m])) by (le))'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 300000
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'P95 session duration is {{ printf "%.0f" $values.B.Value }}ms (threshold: 300000ms / 5 minutes)'
+          summary: The P95 session duration has exceeded 5 minutes, which might indicate user confusion or UX issues
+        labels:
+          severity: warning
+          team: product
+
+      # Low Session Duration Alert (users leaving too quickly)
+      - uid: low-session-duration
+        title: Low Session Duration (P50)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'histogram_quantile(0.50, sum(rate(browser_session_duration_milliseconds_bucket{service_name="adulting-app-browser"}[5m])) by (le))'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 10000
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          description: 'Median session duration is {{ printf "%.0f" $values.B.Value }}ms (threshold: 10000ms / 10 seconds)'
+          summary: The median session duration has dropped below 10 seconds, which might indicate users are leaving quickly
+        labels:
+          severity: warning
+          team: product
+
+      # Browser Error Spike Alert
+      - uid: browser-error-spike
+        title: Browser Error Spike
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(browser_error_total{service_name="adulting-app-browser"}[5m]))'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'Browser error rate is {{ printf "%.2f" $values.B.Value }} errors/second'
+          summary: Browser errors are occurring at an elevated rate
+        labels:
+          severity: warning
+          team: frontend
+
+      # No Traffic Alert (indicates service might be down)
+      - uid: no-traffic
+        title: No Traffic Detected
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(http_server_request_duration_seconds_count{service_name="adulting-app"}[5m]))'
+              refId: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.01
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  type: query
+              refId: C
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'No HTTP traffic detected for the last 5 minutes'
+          summary: The application is not receiving any traffic, which might indicate a service outage
+        labels:
+          severity: critical
+          team: platform
