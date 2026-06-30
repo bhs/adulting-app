@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { AnalyticsExample } from '@/components/AnalyticsExample'
 
 export default function Home() {
   return (
@@ -10,6 +11,10 @@ export default function Home() {
         <p className="text-center mb-8 text-lg">
           A minimal full-stack scaffold with Next.js 14, TypeScript, Tailwind CSS, and Prisma
         </p>
+
+        <div className="mb-12">
+          <AnalyticsExample />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
           <Link
