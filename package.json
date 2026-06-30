@@ -14,6 +14,12 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@honeycombio/opentelemetry-web": "^0.7.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.0",
+    "@opentelemetry/resources": "^1.25.0",
+    "@opentelemetry/sdk-trace-web": "^1.25.0",
+    "@opentelemetry/semantic-conventions": "^1.25.0",
     "@prisma/client": "^5.9.1",
     "next": "14.1.0",
     "react": "^18",

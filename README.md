@@ -11,6 +11,7 @@ A minimal full-stack scaffold using Next.js 14 (App Router) with TypeScript, Tai
 - **ESLint & Prettier** for code quality
 - **GitHub Actions** CI/CD pipeline
 - **Vercel** ready for zero-config deployment
+- **Honeycomb + OpenTelemetry** for error tracking and analytics
 
 ## Project Structure
 
@@ -24,9 +25,13 @@ A minimal full-stack scaffold using Next.js 14 (App Router) with TypeScript, Tai
 │   └── globals.css        # Global styles with Tailwind
 ├── components/            # Reusable React components
 │   ├── Button.tsx
-│   └── Card.tsx
+│   ├── Card.tsx
+│   ├── ClientLayout.tsx   # Client-side layout with telemetry
+│   └── ErrorBoundary.tsx  # React error boundary with OTel
 ├── lib/                   # Utility functions and shared code
-│   └── prisma.ts          # Prisma client singleton
+│   ├── analytics.ts       # Custom event tracking
+│   ├── prisma.ts          # Prisma client singleton
+│   └── telemetry.ts       # OpenTelemetry initialization
 ├── prisma/                # Database schema and migrations
 │   └── schema.prisma      # Prisma schema definition
 ├── .github/
@@ -59,6 +64,11 @@ npm install
 3. Set up environment variables:
 ```bash
 cp .env.example .env
+```
+
+Edit `.env` and add your Honeycomb API key (get one at https://ui.honeycomb.io/account):
+```bash
+NEXT_PUBLIC_HONEYCOMB_API_KEY="your-api-key-here"
 ```
 
 4. Initialize the database:
@@ -112,6 +122,49 @@ npx prisma studio
 
 # Reset database (Warning: deletes all data)
 npx prisma migrate reset
+```
+
+## Error Tracking & Analytics
+
+This project includes integrated error tracking and analytics using Honeycomb and OpenTelemetry:
+
+- **Automatic Error Tracking**: React ErrorBoundary captures and reports errors with stack traces
+- **Session Analytics**: Tracks user sessions with start/end times and duration
+- **Custom Events**: Built-in support for budget_created, session_start, session_end events
+- **Vendor-Portable**: Uses standard OTel semantic conventions
+
+### Key Metrics
+
+The implementation enables tracking of two key results (KRs):
+
+1. **Error Rate <1%**: Ratio of errors to total events
+2. **P50 Session Duration ≥5 minutes**: Median session length
+
+See [HONEYCOMB_SETUP.md](./HONEYCOMB_SETUP.md) for:
+- Complete setup instructions
+- Honeycomb query examples for KR validation
+- Usage examples for custom event tracking
+- Troubleshooting guide
+
+### Quick Usage Example
+
+```typescript
+import { trackBudgetCreated, trackCustomEvent } from '@/lib/analytics';
+
+// Track budget creation
+trackBudgetCreated({
+  budgetId: 'budget-123',
+  userId: 'user-456',
+  amount: 500,
+  currency: 'USD',
+  category: 'groceries',
+});
+
+// Track custom events
+trackCustomEvent('feature_used', {
+  feature: 'dark_mode',
+  enabled: true,
+});
 ```
 
 ## API Routes
