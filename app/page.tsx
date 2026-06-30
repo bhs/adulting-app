@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import BudgetDemo from '@/components/BudgetDemo'
 
 export default function Home() {
   return (
@@ -63,6 +64,8 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        <BudgetDemo />
       </div>
     </main>
   )

@@ -39,3 +39,7 @@ next-env.d.ts
 # prisma
 prisma/*.db
 prisma/*.db-journal
+
+# sentry
+.sentryclirc
+sentry.properties
