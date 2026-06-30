@@ -18,6 +18,21 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
           <Link
+            href="/budget"
+            className="group rounded-lg border border-blue-500 bg-blue-50 px-5 py-4 transition-colors hover:bg-blue-100"
+          >
+            <h2 className="mb-3 text-2xl font-semibold text-blue-900">
+              Budget Dashboard{' '}
+              <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+                →
+              </span>
+            </h2>
+            <p className="m-0 max-w-[30ch] text-sm text-blue-700">
+              Interactive budget calculator with real-time updates
+            </p>
+          </Link>
+
+          <Link
             href="/api/users"
             className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
           >

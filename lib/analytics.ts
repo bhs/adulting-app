@@ -83,6 +83,68 @@ export function trackBudgetCreated(attributes: {
 }
 
 /**
+ * Track when a budget preset is loaded
+ * Records preset_loaded event with preset details
+ */
+export function trackBudgetPresetLoaded(attributes: {
+  presetId: string;
+  presetName: string;
+  userId?: string;
+}) {
+  const spanAttributes: Attributes = {
+    'event.name': 'budget_preset_loaded',
+    'preset.id': attributes.presetId,
+    'preset.name': attributes.presetName,
+  };
+
+  if (attributes.userId) spanAttributes['user.id'] = attributes.userId;
+
+  const span = tracer.startSpan('budget.preset.loaded', {
+    attributes: spanAttributes,
+  });
+
+  span.setStatus({ code: SpanStatusCode.OK });
+  span.end();
+}
+
+/**
+ * Track budget dashboard interactions
+ * Records various user interactions with the budget dashboard
+ */
+export function trackBudgetDashboardEvent(
+  eventType: 'item_added' | 'item_removed' | 'calculation_updated',
+  attributes?: {
+    category?: string;
+    totalIncome?: number;
+    totalExpenses?: number;
+    netCashFlow?: number;
+    savingsRate?: number;
+  }
+) {
+  const spanAttributes: Attributes = {
+    'event.name': `budget_dashboard_${eventType}`,
+    'dashboard.event_type': eventType,
+  };
+
+  if (attributes?.category) spanAttributes['budget.category'] = attributes.category;
+  if (attributes?.totalIncome !== undefined)
+    spanAttributes['budget.total_income'] = attributes.totalIncome;
+  if (attributes?.totalExpenses !== undefined)
+    spanAttributes['budget.total_expenses'] = attributes.totalExpenses;
+  if (attributes?.netCashFlow !== undefined)
+    spanAttributes['budget.net_cash_flow'] = attributes.netCashFlow;
+  if (attributes?.savingsRate !== undefined)
+    spanAttributes['budget.savings_rate'] = attributes.savingsRate;
+
+  const span = tracer.startSpan(`budget.dashboard.${eventType}`, {
+    attributes: spanAttributes,
+  });
+
+  span.setStatus({ code: SpanStatusCode.OK });
+  span.end();
+}
+
+/**
  * Track a custom event with arbitrary attributes
  * Useful for tracking additional user interactions
  */
