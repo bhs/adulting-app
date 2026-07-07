@@ -1,0 +1,25 @@
+version: 1
+type: local
+
+# Command to start the service
+start: "npm run dev"
+
+# Command to stop the service
+stop: "pkill -f 'node.*next'"
+
+# URL to check for health
+health_url: "http://localhost:${PORT}"
+
+# Port configuration
+port:
+  default: 3000
+  range: 100
+
+# Commands to run before start
+setup:
+  - "npm install"
+  - "npx prisma generate"
+  - "npx prisma migrate deploy"
+
+# Environment file to copy
+env_file: ".env.example"

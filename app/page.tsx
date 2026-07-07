@@ -6,11 +6,20 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
         <h1 className="text-4xl font-bold mb-8 text-center">
-          Next.js Minimal Vercel
+          Adulting App
         </h1>
         <p className="text-center mb-8 text-lg">
-          A minimal full-stack scaffold with Next.js 14, TypeScript, Tailwind CSS, and Prisma
+          Take control of your finances with our interactive budget calculator
         </p>
+
+        <div className="mb-12 text-center">
+          <Link
+            href="/budget"
+            className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+          >
+            Launch Budget Calculator →
+          </Link>
+        </div>
 
         <div className="mb-12">
           <AnalyticsExample />

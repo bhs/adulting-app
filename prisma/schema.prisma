@@ -11,12 +11,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     Post[]
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  name                String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  posts               Post[]
+  budgetCalculations  BudgetCalculation[]
 }
 
 model Post {
@@ -28,4 +29,40 @@ model Post {
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model BudgetCalculation {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalIncome   Float    @default(0)
+  totalExpenses Float    @default(0)
+  surplus       Float    @default(0)
+  pointsEarned  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  incomeItems   IncomeItem[]
+  expenseItems  ExpenseItem[]
+}
+
+model IncomeItem {
+  id                   String             @id @default(cuid())
+  budgetCalculationId  String
+  budgetCalculation    BudgetCalculation  @relation(fields: [budgetCalculationId], references: [id], onDelete: Cascade)
+  source               String
+  amount               Float
+  frequency            String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model ExpenseItem {
+  id                   String             @id @default(cuid())
+  budgetCalculationId  String
+  budgetCalculation    BudgetCalculation  @relation(fields: [budgetCalculationId], references: [id], onDelete: Cascade)
+  category             String
+  amount               Float
+  frequency            String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 }

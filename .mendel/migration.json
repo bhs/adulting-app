@@ -1,0 +1,5 @@
+{
+  "up_instructions": "Run 'npx prisma migrate deploy' to apply the budget calculator schema migration",
+  "down_instructions": "Run 'psql $DATABASE_URL -f prisma/migrations/20260707000000_add_budget_calculator/down.sql' to revert the migration",
+  "notes": "Migration files are located in prisma/migrations/20260707000000_add_budget_calculator/. The up migration (migration.sql) adds BudgetCalculation, IncomeItem, and ExpenseItem tables. The down migration (down.sql) cleanly removes these tables without affecting existing User and Post data."
+}

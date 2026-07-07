@@ -83,6 +83,35 @@ export function trackBudgetCreated(attributes: {
 }
 
 /**
+ * Track budget calculation events
+ * Records budget calculation updates with income, expenses, and surplus
+ */
+export function trackBudgetCalculation(attributes: {
+  userId?: string;
+  totalIncome: number;
+  totalExpenses: number;
+  surplus: number;
+  pointsEarned: number;
+}) {
+  const spanAttributes: Attributes = {
+    'event.name': 'budget_calculation',
+    'budget.total_income': attributes.totalIncome,
+    'budget.total_expenses': attributes.totalExpenses,
+    'budget.surplus': attributes.surplus,
+    'budget.points_earned': attributes.pointsEarned,
+  };
+
+  if (attributes.userId) spanAttributes['user.id'] = attributes.userId;
+
+  const span = tracer.startSpan('budget.calculation', {
+    attributes: spanAttributes,
+  });
+
+  span.setStatus({ code: SpanStatusCode.OK });
+  span.end();
+}
+
+/**
  * Track a custom event with arbitrary attributes
  * Useful for tracking additional user interactions
  */
