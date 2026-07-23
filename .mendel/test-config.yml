@@ -1,0 +1,3 @@
+version: 1
+service: app # Container (from docker-compose.test.yml) to run tests in.
+test_command: npm test # Runs the Jest suite (unit + jsdom) inside the container.

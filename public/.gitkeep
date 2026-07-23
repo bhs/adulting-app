@@ -1,0 +1,2 @@
+# Keeps the Next.js `public/` directory present in the repo so the Docker
+# production build's `COPY --from=builder /app/public ./public` step succeeds.

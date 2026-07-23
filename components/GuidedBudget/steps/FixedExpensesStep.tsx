@@ -64,6 +64,7 @@ export function FixedExpensesStep({
         nameLabel="Fixed expense"
         namePlaceholder="e.g., Rent, Insurance"
         listTitle="Your fixed expenses"
+        emptyStateHint="Add the bills that stay the same each month, like rent, insurance, or your phone plan."
         totalTone="red"
         onAdd={onAdd}
         onUpdate={onUpdate}

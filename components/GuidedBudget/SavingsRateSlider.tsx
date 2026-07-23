@@ -53,8 +53,9 @@ export function SavingsRateSlider({ monthlyIncome }: SavingsRateSliderProps) {
             max={50}
             step={1}
             value={rate}
+            aria-valuetext={`${rate} percent`}
             onChange={(e) => setRate(Number(e.target.value))}
-            className="w-full accent-indigo-600 cursor-pointer"
+            className="w-full cursor-pointer text-indigo-600 accent-indigo-600"
           />
           <div className="text-sm text-gray-600 mt-1 mb-4">
             That&apos;s <span className="font-semibold">{formatCurrency(monthlySavings)}</span> saved

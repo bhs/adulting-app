@@ -6,9 +6,27 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Install dependencies based on the preferred package manager. The Prisma schema
+# is copied first because package.json's `postinstall` runs `prisma generate`,
+# which needs the schema present during `npm ci`.
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 RUN npm ci
+
+# Test image: reuses the full dependency set (including devDependencies such as
+# Jest) plus the source tree, and stays alive so Mendel can `exec npm test`.
+# This stage is only built when explicitly targeted (see
+# .mendel/docker-compose.test.yml); the production `runner` build never touches
+# it. The suite is pure unit/jsdom tests, so no database service is required.
+FROM base AS test
+WORKDIR /app
+RUN apk add --no-cache libc6-compat openssl
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx prisma generate
+ENV NODE_ENV=test
+ENV NEXT_TELEMETRY_DISABLED=1
+CMD ["sleep", "infinity"]
 
 # Rebuild the source code only when needed
 FROM base AS builder

@@ -64,6 +64,7 @@ export function VariableExpensesStep({
         nameLabel="Variable expense"
         namePlaceholder="e.g., Groceries, Dining out"
         listTitle="Your variable expenses"
+        emptyStateHint="Add the spending that changes month to month, like groceries, dining out, or entertainment."
         totalTone="red"
         onAdd={onAdd}
         onUpdate={onUpdate}
