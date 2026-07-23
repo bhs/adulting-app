@@ -10,6 +10,7 @@ import {
   HealthStatus,
 } from '@/lib/budget/guided/calculations'
 import { Button } from '@/components/Button'
+import { AnimatedNumber } from '@/components/AnimatedNumber'
 
 interface SummaryDashboardProps {
   state: GuidedBudgetState
@@ -70,7 +71,11 @@ export function SummaryDashboard({ state, onBack, onReset }: SummaryDashboardPro
                 gradeColors[health.grade]
               } flex flex-col items-center justify-center text-white shadow-md`}
             >
-              <div className="text-4xl font-black leading-none">{health.overall}</div>
+              <AnimatedNumber
+                value={health.overall}
+                durationMs={900}
+                className="text-4xl font-black leading-none tabular-nums"
+              />
               <div className="text-sm font-semibold mt-1">Grade {health.grade}</div>
             </div>
             <div className="flex-1">
@@ -127,7 +132,11 @@ export function SummaryDashboard({ state, onBack, onReset }: SummaryDashboardPro
           {categories.map((cat) => (
             <div key={cat.key} className="bg-white rounded-lg shadow-md p-4 text-center">
               <div className="text-xs text-gray-500 mb-1">{cat.label}</div>
-              <div className={`text-xl font-bold ${cat.tone}`}>{formatCurrency(cat.value)}</div>
+              <AnimatedNumber
+                value={cat.value}
+                format={formatCurrency}
+                className={`block text-xl font-bold tabular-nums ${cat.tone}`}
+              />
             </div>
           ))}
         </motion.div>
@@ -150,9 +159,11 @@ export function SummaryDashboard({ state, onBack, onReset }: SummaryDashboardPro
                 Savings rate: {formatPercentage(totals.savingsRate)}
               </div>
             </div>
-            <div className={`text-3xl font-bold ${leftoverPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(Math.abs(totals.leftover))}
-            </div>
+            <AnimatedNumber
+              value={Math.abs(totals.leftover)}
+              format={formatCurrency}
+              className={`text-3xl font-bold tabular-nums ${leftoverPositive ? 'text-green-600' : 'text-red-600'}`}
+            />
           </div>
           {leftoverPositive && totals.leftover > 0 && (
             <p className="text-sm text-gray-600 mt-3">

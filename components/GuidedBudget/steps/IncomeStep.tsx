@@ -52,12 +52,14 @@ export function IncomeStep({
       isFirst
       nextLabel="Next: Fixed Expenses →"
       canGoNext={items.length > 0}
+      disabledHint="Add at least one income source to continue."
     >
       <LineItemEditor
         items={items}
         nameLabel="Income source"
         namePlaceholder="e.g., Salary, Freelance"
         listTitle="Your income sources"
+        emptyStateHint="Add your first income source above to get started — most people begin with their take-home paycheck."
         totalTone="green"
         onAdd={onAdd}
         onUpdate={onUpdate}

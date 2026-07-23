@@ -68,6 +68,7 @@ export function SavingsStep({
         nameLabel="Savings goal"
         namePlaceholder="e.g., Emergency fund, 401(k)"
         listTitle="Your savings"
+        emptyStateHint="Add money you set aside for the future, like an emergency fund, retirement, or a big goal."
         totalTone="green"
         onAdd={onAdd}
         onUpdate={onUpdate}

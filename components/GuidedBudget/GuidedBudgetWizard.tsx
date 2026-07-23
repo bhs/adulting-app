@@ -10,6 +10,7 @@ import {
 } from '@/lib/budget/guided/types'
 import { calculateTotals } from '@/lib/budget/guided/calculations'
 import { loadState, saveState, clearState } from '@/lib/budget/guided/storage'
+import { prefersReducedMotion } from '@/lib/ui/motion'
 import { trackCustomEvent } from '@/lib/analytics'
 import { ProgressIndicator } from './ProgressIndicator'
 import { IncomeStep } from './steps/IncomeStep'
@@ -33,6 +34,7 @@ export function GuidedBudgetWizard() {
   // returning user's saved budget with the empty initial state.
   const [hydrated, setHydrated] = useState(false)
   const trackedCompletion = useRef(false)
+  const prevStepIndex = useRef(state.stepIndex)
 
   // Load any persisted state once, after mount (localStorage is client-only).
   useEffect(() => {
@@ -49,6 +51,22 @@ export function GuidedBudgetWizard() {
       saveState(state)
     }
   }, [state, hydrated])
+
+  // On a phone the user is often scrolled down inside a step's form when they
+  // advance. Without this, the next step opens mid-scroll and its heading/lesson
+  // are off-screen — a common point of confusion and drop-off. Reset to the top
+  // whenever the step actually changes (not on unrelated state updates).
+  useEffect(() => {
+    if (prevStepIndex.current !== state.stepIndex) {
+      prevStepIndex.current = state.stepIndex
+      if (typeof window !== 'undefined') {
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        })
+      }
+    }
+  }, [state.stepIndex])
 
   // Fire a single analytics event the first time the user reaches the summary.
   useEffect(() => {

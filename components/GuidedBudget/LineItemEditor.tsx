@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LineItem } from '@/lib/budget/guided/types'
 import { formatCurrency } from '@/lib/budget/guided/calculations'
 import { Button } from '@/components/Button'
+import { AnimatedNumber } from '@/components/AnimatedNumber'
 
 interface LineItemEditorProps {
   items: LineItem[]
@@ -14,6 +15,8 @@ interface LineItemEditorProps {
   namePlaceholder: string
   /** Heading shown above the list of entered items. */
   listTitle: string
+  /** Friendly guidance shown before the user has added anything. */
+  emptyStateHint: string
   /** Accent color for the running total. */
   totalTone: 'green' | 'red'
   onAdd: (name: string, amount: number) => void
@@ -30,6 +33,7 @@ export function LineItemEditor({
   nameLabel,
   namePlaceholder,
   listTitle,
+  emptyStateHint,
   totalTone,
   onAdd,
   onUpdate,
@@ -87,7 +91,8 @@ export function LineItemEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={namePlaceholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              enterKeyHint="next"
+              className="w-full min-h-[48px] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -97,11 +102,14 @@ export function LineItemEditor({
             <input
               id="item-amount"
               type="number"
+              inputMode="decimal"
               step="0.01"
+              min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              enterKeyHint="done"
+              className="w-full min-h-[48px] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -117,10 +125,10 @@ export function LineItemEditor({
         </div>
       </form>
 
-      {items.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      {items.length > 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{listTitle}</h3>
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {items.map((item) => (
               <motion.div
                 key={item.id}
@@ -128,22 +136,26 @@ export function LineItemEditor({
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0"
+                className="flex items-center justify-between gap-3 py-2 border-b border-gray-200 last:border-b-0"
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">{item.name}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-gray-900 truncate">{item.name}</div>
                   <div className="text-sm text-gray-600">{formatCurrency(item.amount)}</div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-shrink-0 items-center">
                   <button
+                    type="button"
                     onClick={() => handleEdit(item)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                    aria-label={`Edit ${item.name}`}
+                    className="min-h-[44px] min-w-[44px] px-3 flex items-center justify-center rounded-md text-blue-600 hover:bg-blue-50 hover:text-blue-800 text-sm font-medium transition-colors"
                   >
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={() => onRemove(item.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                    aria-label={`Remove ${item.name}`}
+                    className="min-h-[44px] min-w-[44px] px-3 flex items-center justify-center rounded-md text-red-600 hover:bg-red-50 hover:text-red-800 text-sm font-medium transition-colors"
                   >
                     Remove
                   </button>
@@ -153,8 +165,22 @@ export function LineItemEditor({
           </AnimatePresence>
           <div className="mt-4 pt-4 border-t-2 border-gray-300 flex justify-between items-center">
             <span className="text-lg font-semibold text-gray-900">Monthly total:</span>
-            <span className={`text-2xl font-bold ${totalColor}`}>{formatCurrency(total)}</span>
+            <AnimatedNumber
+              value={total}
+              format={formatCurrency}
+              className={`text-2xl font-bold tabular-nums ${totalColor}`}
+            />
           </div>
+        </div>
+      ) : (
+        <div
+          className="rounded-lg border-2 border-dashed border-gray-200 bg-white/60 p-6 mb-6 text-center"
+          role="note"
+        >
+          <div className="text-3xl mb-2" aria-hidden="true">
+            ✏️
+          </div>
+          <p className="text-sm text-gray-600 max-w-xs mx-auto">{emptyStateHint}</p>
         </div>
       )}
     </div>

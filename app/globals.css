@@ -1,3 +1,63 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Smoothly reveal step-to-step scroll jumps without jarring the user. */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /*
+   * Thumb-friendly range inputs. The default native slider thumb is far smaller
+   * than the 48px touch-target guideline, which makes the savings-rate slider
+   * fiddly on a phone. Enlarge the thumb and give the track some height so it is
+   * comfortable to drag with a thumb.
+   */
+  input[type='range'] {
+    height: 1.75rem;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: currentColor;
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: currentColor;
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/*
+ * Respect the user's reduced-motion preference. Framer Motion animations run in
+ * JS (and are guarded separately via prefersReducedMotion), but this neutralizes
+ * every CSS transition/animation — progress bars, hovers, the smooth scroll —
+ * for users who are sensitive to movement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

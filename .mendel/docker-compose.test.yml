@@ -1,0 +1,17 @@
+# Test stack for the journey-polish-and-delight variation.
+#
+# The suite is pure Jest (unit tests + jsdom component helpers) and needs no
+# database, so we build the Dockerfile's `test` stage — which carries the dev
+# dependencies and the full source tree — and keep the container alive so Mendel
+# can `exec` the test command inside it.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: test
+    command: ['sleep', 'infinity']
+    environment:
+      NODE_ENV: test
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
