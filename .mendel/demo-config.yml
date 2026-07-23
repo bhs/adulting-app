@@ -1,0 +1,8 @@
+version: 1
+service: app # Which docker-compose service to expose.
+container_port: 3000 # Port the Next.js server listens on inside the container.
+health_path: /api/health # Readiness probe endpoint.
+
+# The app container runs `prisma migrate deploy` on startup (see Dockerfile CMD),
+# so no additional after_up migration steps are required. The guided-learning
+# wizard persists its state in the browser (localStorage) and needs no seeding.

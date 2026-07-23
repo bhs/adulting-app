@@ -1,0 +1,38 @@
+# Demo stack for the guided-learning-wizard variation.
+#
+# The wizard itself is entirely client-side (state lives in localStorage), so no
+# schema changes are needed. Postgres is still required because the app's
+# startup command runs `prisma migrate deploy` before serving.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - '3000' # Let Docker assign the host port.
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/app
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: '1'
+    healthcheck:
+      # node:20-alpine ships busybox wget; --spider makes a HEAD-style probe.
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d app']
+      interval: 2s
+      timeout: 5s
+      retries: 15

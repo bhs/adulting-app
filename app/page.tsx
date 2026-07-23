@@ -1,9 +1,9 @@
-import { BudgetCalculator } from '@/components/BudgetCalculator'
+import { GuidedBudgetWizard } from '@/components/GuidedBudget'
 
 export default function Home() {
   return (
     <main>
-      <BudgetCalculator />
+      <GuidedBudgetWizard />
     </main>
   )
 }
