@@ -42,7 +42,17 @@ npm run lint          # Check linting
 npm run type-check    # Check types
 npm run format:check  # Check formatting
 npm run format        # Auto-format code
+npm test              # Run the test suite
+npm run test:coverage # Run tests and enforce coverage thresholds
 ```
+
+### Testing & Coverage
+
+Tests are written with Jest and React Testing Library. Coverage is enforced:
+the suite fails if global coverage drops below 80%, and business-critical
+financial modules (`lib/budget/*`) are held to 90–100%. CI runs
+`npm run test:ci` on every push and pull request. See
+[TESTING.md](./TESTING.md) for the full workflow and thresholds.
 
 ## Common Tasks
 

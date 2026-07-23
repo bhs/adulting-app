@@ -215,6 +215,20 @@ describe('budgetReducer', () => {
     })
   })
 
+  describe('unknown action', () => {
+    it('returns the state unchanged for an unrecognized action type', () => {
+      const populated = budgetReducer(state, {
+        type: 'ADD_EXPENSE',
+        payload: { name: 'Rent', amount: 1500 },
+      })
+      // Cast through unknown to exercise the reducer's default branch.
+      const result = budgetReducer(populated, {
+        type: 'NOPE',
+      } as unknown as Parameters<typeof budgetReducer>[1])
+      expect(result).toBe(populated)
+    })
+  })
+
   describe('RESET', () => {
     it('should reset to initial state', () => {
       let newState = budgetReducer(state, {

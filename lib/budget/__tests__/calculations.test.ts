@@ -1,5 +1,9 @@
 import { describe, it, expect } from '@jest/globals'
-import { calculateBudgetSummary, formatCurrency, formatPercentage } from '../calculations'
+import {
+  calculateBudgetSummary,
+  formatCurrency,
+  formatPercentage,
+} from '../calculations'
 import { BudgetState } from '../types'
 
 describe('calculateBudgetSummary', () => {
@@ -95,8 +99,10 @@ describe('formatCurrency', () => {
   })
 
   it('should round to nearest dollar', () => {
+    // Intl.NumberFormat uses "halfExpand" rounding (round half away from
+    // zero), the ECMAScript default — so exactly .5 rounds up.
     expect(formatCurrency(1500.49)).toBe('$1,500')
-    expect(formatCurrency(1500.5)).toBe('$1,500')
+    expect(formatCurrency(1500.5)).toBe('$1,501')
     expect(formatCurrency(1500.51)).toBe('$1,501')
   })
 })
