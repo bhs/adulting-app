@@ -1,16 +1,28 @@
 /**
  * @jest-environment node
  *
- * Integration tests for the soft-launch access middleware.
+ * Integration tests for the SSO access middleware.
  *
- * The real middleware runs against real NextRequest objects; only the
- * SOFT_LAUNCH_ALLOWLIST environment variable is swapped between cases. This
- * exercises the actual header/cookie extraction, the env-driven gate, and the
- * 403 response shape without a running server.
+ * Identity now comes from the Auth.js session (`request.auth`) rather than a
+ * header/cookie. We stub the edge `auth()` wrapper with an identity function so
+ * the wrapped handler is testable directly, then drive it with real NextRequest
+ * objects carrying a synthetic session. This exercises the real
+ * public-path / redirect / soft-launch-403 decision and the response shapes it
+ * produces, without a running Auth.js runtime.
  */
-import { describe, it, expect, afterEach } from '@jest/globals'
+import { describe, it, expect, afterEach, jest } from '@jest/globals'
 import { NextRequest } from 'next/server'
-import { middleware } from '@/middleware'
+
+// Replace the edge Auth.js instance with an identity wrapper so `middleware`
+// (its default export) is just the decision handler we can call directly.
+jest.mock('@/lib/auth/edge', () => ({
+  auth: (handler: unknown) => handler,
+}))
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const middleware = require('@/middleware').default as (
+  req: NextRequest
+) => Response
 
 const ORIGINAL_ALLOWLIST = process.env.SOFT_LAUNCH_ALLOWLIST
 
@@ -22,57 +34,56 @@ afterEach(() => {
   }
 })
 
-/** Build a NextRequest for a path, optionally carrying an identifying email. */
+/** Build a NextRequest for a path, optionally attaching a signed-in session. */
 function request(
   path: string,
-  opts: { header?: string; cookie?: string } = {}
+  session?: { user?: { email?: string | null } } | null
 ): NextRequest {
-  const headers = new Headers()
-  if (opts.header) headers.set('x-user-email', opts.header)
-  if (opts.cookie) headers.set('cookie', `soft_launch_email=${opts.cookie}`)
-  return new NextRequest(`https://adulting-app.onrender.com${path}`, {
-    headers,
-  })
+  const req = new NextRequest(`https://adulting-app.onrender.com${path}`)
+  ;(req as unknown as { auth: unknown }).auth = session ?? null
+  return req
 }
 
-describe('soft-launch middleware', () => {
-  it('lets every request through when no allowlist is configured', () => {
+describe('SSO middleware', () => {
+  it('lets unauthenticated requests reach public paths (health check)', () => {
+    const res = middleware(request('/api/health'))
+    expect(res.status).toBe(200)
+  })
+
+  it('redirects an unauthenticated visitor on a protected path to /login', () => {
+    const res = middleware(request('/dashboard'))
+    expect(res.status).toBe(307)
+    const location = res.headers.get('location')!
+    expect(location).toContain('/login')
+    // The originally requested path is preserved for post-login return.
+    expect(location).toContain('callbackUrl=%2Fdashboard')
+  })
+
+  it('allows any authenticated user when no allowlist is configured', () => {
     delete process.env.SOFT_LAUNCH_ALLOWLIST
-    const res = middleware(request('/dashboard'))
-    expect(res.status).toBe(200)
-  })
-
-  it('allows a tester whose header email is on the list', () => {
-    process.env.SOFT_LAUNCH_ALLOWLIST = 'tester@example.com'
     const res = middleware(
-      request('/dashboard', { header: 'Tester@Example.com' })
+      request('/dashboard', { user: { email: 'anyone@school.edu' } })
     )
     expect(res.status).toBe(200)
   })
 
-  it('allows a tester identified by the soft_launch_email cookie', () => {
+  it('allows an authenticated user whose email is on the soft-launch list', () => {
     process.env.SOFT_LAUNCH_ALLOWLIST = 'tester@example.com'
     const res = middleware(
-      request('/dashboard', { cookie: 'tester@example.com' })
+      request('/dashboard', { user: { email: 'Tester@Example.com' } })
     )
     expect(res.status).toBe(200)
   })
 
-  it('blocks a request with no email once the gate is active', async () => {
+  it('blocks an authenticated user not on the soft-launch list with a 403', async () => {
     process.env.SOFT_LAUNCH_ALLOWLIST = 'tester@example.com'
-    const res = middleware(request('/dashboard'))
+    const res = middleware(
+      request('/dashboard', { user: { email: 'stranger@evil.com' } })
+    )
     expect(res.status).toBe(403)
     await expect(res.json()).resolves.toEqual({
       error:
         'This soft launch is invite-only. Your email is not on the access list.',
     })
-  })
-
-  it('blocks an email that is not on the list', () => {
-    process.env.SOFT_LAUNCH_ALLOWLIST = 'tester@example.com'
-    const res = middleware(
-      request('/dashboard', { header: 'stranger@evil.com' })
-    )
-    expect(res.status).toBe(403)
   })
 })
