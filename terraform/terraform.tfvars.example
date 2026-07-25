@@ -1,0 +1,30 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored — never
+# commit real secrets. Prefer supplying secrets via environment variables:
+#   export TF_VAR_render_api_key="rnd_..."
+#   export TF_VAR_render_owner_id="tea_..."
+
+# --- Required ---------------------------------------------------------------
+render_api_key  = "rnd_replace_me"
+render_owner_id = "tea-replace-me"
+
+# --- Service ----------------------------------------------------------------
+service_name = "adulting-app"
+region       = "oregon"
+plan         = "starter"
+repo_url     = "https://github.com/adulting-app/adulting-app"
+branch       = "main"
+
+# --- Soft-launch cohort -----------------------------------------------------
+# The email allow-list gating the soft launch. Start with a handful of
+# addresses, add whole partner domains with '*@domain', and open the launch to
+# everyone by setting the list to ["*"]. An empty list keeps the launch closed.
+soft_launch_allowlist = [
+  "founder@adulting.app",
+  "beta-tester@example.com",
+  "*@partner.com",
+]
+
+# --- Extra env vars (optional) ----------------------------------------------
+# extra_env_vars = {
+#   NEXT_PUBLIC_HONEYCOMB_API_KEY = "your-honeycomb-key"
+# }

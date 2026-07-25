@@ -1,4 +1,4 @@
-# Test stack for the journey-polish-and-delight variation.
+# Test stack for the render-terraform production-launch variation.
 #
 # The suite is pure Jest (unit tests + jsdom component helpers) and needs no
 # database, so we build the Dockerfile's `test` stage — which carries the dev
