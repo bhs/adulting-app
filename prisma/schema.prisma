@@ -11,12 +11,58 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     Post[]
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  // Auth.js adapter fields: emailVerified is set by OIDC providers, image holds
+  // the profile picture returned in the id_token.
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  posts         Post[]
+  // Linked school SSO identities and their persisted sessions.
+  accounts      Account[]
+  sessions      Session[]
+}
+
+// Auth.js models. `Account` stores one row per linked SSO identity (a Google
+// Workspace or Microsoft Entra ID login), `Session` backs database-strategy
+// sessions, and `VerificationToken` supports email verification flows. The
+// column names use the snake_case OAuth token field names the Auth.js Prisma
+// adapter expects verbatim.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Post {

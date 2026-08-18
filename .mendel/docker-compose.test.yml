@@ -1,9 +1,14 @@
-# Test stack for the github-actions-render variation.
+# Test stack for the authjs-google-microsoft-oidc variation.
 #
-# The suite is pure Jest (unit tests + jsdom component helpers) and needs no
-# database, so we build the Dockerfile's `test` stage — which carries the dev
-# dependencies and the full source tree — and keep the container alive so Mendel
-# can `exec` the test command inside it.
+# Most of the suite is pure Jest (unit tests + static component rendering) and
+# needs no database. The one exception is the migration test
+# (prisma/migrations/__tests__/auth-migration.test.ts), which applies the real
+# up/down SQL against PostgreSQL — so this stack now includes a `db` service and
+# passes DATABASE_URL to the app container. The migration test skips itself when
+# DATABASE_URL is unset, keeping a plain host `npm test` green.
+#
+# We build the Dockerfile's `test` stage (dev dependencies + full source tree)
+# and keep the container alive so Mendel can `exec` the test command inside it.
 services:
   app:
     build:
@@ -11,7 +16,21 @@ services:
       dockerfile: Dockerfile
       target: test
     command: ['sleep', 'infinity']
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       NODE_ENV: test
       CI: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
+      DATABASE_URL: postgres://postgres:test@db:5432/test
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 2s
+      timeout: 5s
+      retries: 10

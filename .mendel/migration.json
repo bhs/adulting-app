@@ -1,0 +1,5 @@
+{
+  "up_instructions": "npx prisma migrate deploy",
+  "down_instructions": "psql \"$DATABASE_URL\" -f prisma/migrations/20260725_add_auth_tables/down.sql",
+  "notes": "Adds the Auth.js (NextAuth) adapter tables for school SSO. Up SQL: prisma/migrations/20260725_add_auth_tables/migration.sql (creates Account, Session, VerificationToken and adds User.emailVerified / User.image). Down SQL: prisma/migrations/20260725_add_auth_tables/down.sql (drops the tables/columns; leaves existing User and Post data intact). Covered by prisma/migrations/__tests__/auth-migration.test.ts."
+}

@@ -17,6 +17,14 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/app
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: '1'
+      # Auth.js needs a secret to sign session cookies and — because the demo
+      # runs off-Vercel behind Docker's assigned host — an explicit trust-host
+      # flag. This is a throwaway demo secret, not a production credential. No
+      # GOOGLE_/AZURE_AD_ OAuth credentials are supplied, so the /login page
+      # renders the SSO UI but real sign-in requires a school's own OAuth apps
+      # (see SCHOOL_SSO_SETUP.md).
+      AUTH_SECRET: demo-only-not-a-real-secret-change-me
+      AUTH_TRUST_HOST: 'true'
     healthcheck:
       # node:20-alpine ships busybox wget; --spider makes a HEAD-style probe.
       test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']

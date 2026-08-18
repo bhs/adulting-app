@@ -1,44 +1,53 @@
-import { NextResponse, type NextRequest } from 'next/server'
-import { isEmailAllowed, parseAllowlist } from '@/lib/access/allowlist'
+import { NextResponse } from 'next/server'
+import { auth } from '@/lib/auth/edge'
+import { parseAllowlist } from '@/lib/access/allowlist'
+import { resolveAccess } from '@/lib/auth/access'
 
 /**
- * Identify the tester behind a request during the soft launch. The cohort is
- * recognized either by an `x-user-email` header (set by the upstream auth
- * proxy) or a `soft_launch_email` cookie written when a tester follows their
- * invite link. Returns undefined when neither is present.
+ * Protect the calculator (and every other app route) behind school SSO.
+ *
+ * The handler is wrapped with Auth.js's `auth()` so `request.auth` carries the
+ * signed-in session (or null). The actual decision lives in the pure
+ * `resolveAccess` helper, which layers two gates:
+ *
+ *   1. Authentication — unauthenticated visitors are redirected to `/login`,
+ *      carrying the originally requested path as `callbackUrl` so they land
+ *      back where they started after signing in.
+ *   2. Soft-launch allow-list — during the invite-only launch, an authenticated
+ *      user whose email is not on SOFT_LAUNCH_ALLOWLIST gets a 403. The list is
+ *      read at request time so the Render dashboard can grow the cohort — or
+ *      lift the gate entirely (empty list) — without a redeploy.
+ *
+ * Public paths (login, the Auth.js endpoints, the health check) fall through
+ * untouched; see `isPublicPath` in `lib/auth/access.ts`.
  */
-function requestEmail(request: NextRequest): string | undefined {
-  return (
-    request.headers.get('x-user-email') ??
-    request.cookies.get('soft_launch_email')?.value ??
-    undefined
-  )
-}
+export default auth((request) => {
+  const decision = resolveAccess({
+    pathname: request.nextUrl.pathname,
+    isAuthenticated: Boolean(request.auth),
+    email: request.auth?.user?.email,
+    allowlist: parseAllowlist(process.env.SOFT_LAUNCH_ALLOWLIST),
+  })
 
-/**
- * Gate application traffic behind the soft-launch email allow-list. The list is
- * read from SOFT_LAUNCH_ALLOWLIST at request time so the Render dashboard can
- * grow the cohort — or lift the gate entirely — without a redeploy. Requests
- * that fail the gate get a 403; everything else falls through untouched.
- */
-export function middleware(request: NextRequest): NextResponse {
-  const allowlist = parseAllowlist(process.env.SOFT_LAUNCH_ALLOWLIST)
-
-  if (isEmailAllowed(requestEmail(request), allowlist)) {
-    return NextResponse.next()
+  if (decision.type === 'redirect') {
+    const loginUrl = new URL(decision.to, request.nextUrl.origin)
+    loginUrl.searchParams.set(
+      'callbackUrl',
+      request.nextUrl.pathname + request.nextUrl.search
+    )
+    return NextResponse.redirect(loginUrl)
   }
 
-  return NextResponse.json(
-    {
-      error:
-        'This soft launch is invite-only. Your email is not on the access list.',
-    },
-    { status: 403 }
-  )
-}
+  if (decision.type === 'forbid') {
+    return NextResponse.json({ error: decision.reason }, { status: 403 })
+  }
+
+  return NextResponse.next()
+})
 
 export const config = {
-  // Apply the gate to app traffic, but leave the health check, static assets,
-  // and Next internals open so deploy smoke tests and the CDN keep working.
-  matcher: ['/((?!api/health|_next/static|_next/image|favicon.ico).*)'],
+  // Apply the gate to app traffic, but leave static assets and Next internals
+  // open. The health check and the Auth.js endpoints are matched here but
+  // treated as public by `resolveAccess`, so they still pass through.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
